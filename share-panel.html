@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share This Page</title>
+  <style>
+    :root {
+      --primary: #3B82F6;
+      --bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --border: #e1e4e8;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .container {
+      max-width: 100%;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    
+    .platform-btn {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    
+    .platform-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .search-box {
+      margin-bottom: 20px;
+      padding: 10px;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    
+    .preview-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+    
+    .preview-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .preview-desc {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .preview-url {
+      font-size: 0.8rem;
+      color: var(--primary);
+      word-break: break-all;
+    }
+    
+    .preview-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    
+    .category-tab {
+      padding: 6px 12px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+    }
+    
+    .category-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Share this page</h1>
+    
+    <div class="preview-card">
+      <div class="preview-title" id="preview-title"></div>
+      <div class="preview-desc" id="preview-desc"></div>
+      <div class="preview-url" id="preview-url"></div>
+      <img id="preview-image" class="preview-image">
+    </div>
+    
+    <input type="text" id="search-box" class="search-box" placeholder="Search platforms...">
+    
+    <div class="category-tabs" id="category-tabs">
+      <div class="category-tab active" data-category="all">All</div>
+      <div class="category-tab" data-category="social">Social</div>
+      <div class="category-tab" data-category="messaging">Messaging</div>
+      <div class="category-tab" data-category="professional">Professional</div>
+      <div class="category-tab" data-category="blogging">Blogging</div>
+	  <div class="category-tab" data-category="bookmarking">Bookmarking</div>
+	  <div class="category-tab" data-category="discussion">Discussion</div>
+	  <div class="category-tab" data-category="specialized">Specialized</div>
+      <div class="category-tab" data-category="media">Media</div>
+      <div class="category-tab" data-category="other">Other</div>
+    </div>
+    
+    <div class="platforms-grid" id="platforms-container"></div>
+  </div>
+
+  <script>
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUrl = urlParams.get('url') || '';
+    const pageTitle = urlParams.get('title') || '';
+    const pageDesc = urlParams.get('desc') || '';
+    const pageImage = urlParams.get('image') || '';
+    
+    // Set preview content
+    document.getElementById('preview-title').textContent = decodeURIComponent(pageTitle);
+    document.getElementById('preview-desc').textContent = decodeURIComponent(pageDesc);
+    document.getElementById('preview-url').textContent = decodeURIComponent(currentUrl);
+    
+    if (pageImage) {
+      const imgEl = document.getElementById('preview-image');
+      imgEl.src = decodeURIComponent(pageImage);
+      imgEl.style.display = 'block';
+    }
+    
+     // Social platforms data
+const socialPlatforms = [
+  // Mainstream Social Networks (15)
+  { name: 'Facebook', color: '#1877F2', category: 'social',  url: (u,t,d,i) => `https://www.facebook.com/sharer/sharer.php?u=${u}&quote=${t}` },
+  { name: 'Twitter', color: '#1DA1F2', category: 'social', url: (u,t,d,i) => `https://twitter.com/intent/tweet?text=${t}&url=${u}` },
+  { name: 'LinkedIn', color: '#0077B5', category: 'social', url: (u,t,d,i) => `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+  { name: 'Instagram', color: '#E4405F', category: 'social', url: (u,t,d,i) => `https://www.instagram.com/?url=${u}` }, // Note: Limited sharing capability
+  { name: 'Pinterest', color: '#E60023', category: 'social', url: (u,t,d,i) => `https://pinterest.com/pin/create/button/?url=${u}&description=${t}` },
+  { name: 'Reddit', color: '#FF5700', category: 'social', url: (u,t,d,i) => `https://www.reddit.com/submit?url=${u}&title=${t}` },
+  { name: 'Tumblr', color: '#36465D', category: 'social', url: (u,t,d,i) => `https://www.tumblr.com/widgets/share/tool?canonicalUrl=${u}&title=${t}` },
+  { name: 'Flickr', color: '#0063DC', category: 'social', url: (u,t,d,i) => `https://www.flickr.com/share?url=${u}` },
+  { name: 'VK', color: '#4A76A8', category: 'social', url: (u,t,d,i) => `https://vk.com/share.php?url=${u}&title=${t}` },
+  { name: 'Weibo', color: '#E6162D', category: 'social', url: (u,t,d,i) => `http://service.weibo.com/share/share.php?url=${u}&title=${t}` },
+  { name: 'Odnoklassniki', color: '#EE8208', category: 'social', url: (u,t,d,i) => `https://connect.ok.ru/offer?url=${u}&title=${t}` },
+  { name: 'Xing', color: '#006567', category: 'social', url: (u,t,d,i) => `https://www.xing.com/spi/shares/new?url=${u}` },
+  { name: 'Renren', color: '#217DC6', category: 'social', url: (u,t,d,i) => `http://share.renren.com/share/buttonshare.do?link=${u}&title=${t}` },
+  { name: 'Taringa!', color: '#005DAB', category: 'social', url: (u,t,d,i) => `https://www.taringa.net/share?url=${u}&title=${t}` },
+  { name: 'Mixi', color: '#D1AD5A', category: 'social', url: (u,t,d,i) => `https://mixi.jp/share.pl?url=${u}` },
+
+  // Messaging Apps (15)
+  { name: 'WhatsApp', color: '#25D366', category: 'messaging', url: (u,t,d,i) => `https://wa.me/?text=${t}%20${u}` },
+  { name: 'Telegram', color: '#0088CC', category: 'messaging', url: (u,t,d,i) => `https://t.me/share/url?url=${u}&text=${t}` },
+  { name: 'Signal', color: '#2592E9', category: 'messaging', url: (u,t,d,i) => `https://signal.me/#/?text=${t}%20${u}` },
+  { name: 'Viber', color: '#7360F2', category: 'messaging', url: (u,t,d,i) => `viber://forward?text=${t}%20${u}` },
+  { name: 'Line', color: '#00C300', category: 'messaging', url: (u,t,d,i) => `https://social-plugins.line.me/lineit/share?url=${u}&text=${t}` },
+  { name: 'WeChat', color: '#07C160', category: 'messaging', url: (u,t,d,i) => `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${u}` },
+  { name: 'KakaoTalk', color: '#FFCD00', category: 'messaging', url: (u,t,d,i) => `https://story.kakao.com/share?url=${u}` },
+  { name: 'Discord', color: '#5865F2', category: 'messaging', url: (u,t,d,i) => `https://discordapp.com/channels/@me?message=${t}%20${u}` },
+  { name: 'Skype', color: '#00AFF0', category: 'messaging', url: (u,t,d,i) => `https://web.skype.com/share?url=${u}&text=${t}` },
+  { name: 'Snapchat', color: '#FFFC00', category: 'messaging', url: (u,t,d,i) => `https://www.snapchat.com/scan?attachmentUrl=${u}` },
+  { name: 'ICQ', color: '#7EBD00', category: 'messaging', url: (u,t,d,i) => `https://icq.com/share?url=${u}&text=${t}` },
+  { name: 'Threema', color: '#3FE669', category: 'messaging', url: (u,t,d,i) => `https://threema.id/compose?text=${t}%20${u}` },
+  { name: 'Wickr', color: '#76EEC5', category: 'messaging', url: (u,t,d,i) => `https://wickr.com/share/?text=${t}%20${u}` },
+  { name: 'Zalo', color: '#0180C7', category: 'messaging', url: (u,t,d,i) => `https://zalo.me/share?url=${u}&text=${t}` },
+  { name: 'Jami', color: '#0ABF53', category: 'messaging', url: (u,t,d,i) => `https://jami.net/share?text=${t}%20${u}` },
+
+  // Video Sharing (15)
+  { name: 'YouTube', color: '#FF0000', category: 'media', url: (u,t,d,i) => `https://www.youtube.com/share?url=${u}` },
+  { name: 'TikTok', color: '#000000', category: 'media', url: (u,t,d,i) => `https://www.tiktok.com/share/link/?url=${u}` },
+  { name: 'Twitch', color: '#9146FF', category: 'media', url: (u,t,d,i) => `https://www.twitch.tv/share?url=${u}` },
+  { name: 'Dailymotion', color: '#0066DC', category: 'media', url: (u,t,d,i) => `https://www.dailymotion.com/share?url=${u}` },
+  { name: 'Vimeo', color: '#1AB7EA', category: 'media', url: (u,t,d,i) => `https://vimeo.com/share?url=${u}` },
+  { name: 'Metacafe', color: '#FDDF4E', category: 'media', url: (u,t,d,i) => `https://www.metacafe.com/share/?url=${u}` },
+  { name: 'Rumble', color: '#85C742', category: 'media', url: (u,t,d,i) => `https://rumble.com/post?url=${u}` },
+  { name: 'Odysee', color: '#FF5100', category: 'media', url: (u,t,d,i) => `https://odysee.com/share?url=${u}` },
+  { name: 'PeerTube', color: '#F1680D', category: 'media', url: (u,t,d,i) => `https://joinpeertube.org/share?url=${u}` },
+  { name: 'LBRY', color: '#2F9176', category: 'media', url: (u,t,d,i) => `https://lbry.com/share?url=${u}` },
+  { name: 'BitChute', color: '#2D2D2D', category: 'media', url: (u,t,d,i) => `https://www.bitchute.com/share/?url=${u}` },
+  { name: 'Floatplane', color: '#00AEEF', category: 'media', url: (u,t,d,i) => `https://www.floatplane.com/share?url=${u}` },
+  { name: 'Vevo', color: '#EF0000', category: 'media', url: (u,t,d,i) => `https://www.vevo.com/share?url=${u}` },
+  { name: 'VidLii', color: '#FF7F00', category: 'media', url: (u,t,d,i) => `https://www.vidlii.com/share?url=${u}` },
+  { name: 'DTube', color: '#FF0000', category: 'media', url: (u,t,d,i) => `https://d.tube/share?url=${u}` },
+
+  // Photo Sharing (10)
+  { name: 'Imgur', color: '#1BB76E', category: 'media', url: (u,t,d,i) => `https://imgur.com/share?url=${u}` },
+  { name: '500px', color: '#0099E5', category: 'media', url: (u,t,d,i) => `https://500px.com/share?url=${u}` },
+  { name: 'DeviantArt', color: '#05CC47', category: 'media', url: (u,t,d,i) => `https://www.deviantart.com/share?url=${u}` },
+  { name: 'Behance', color: '#1769FF', category: 'media', url: (u,t,d,i) => `https://www.behance.net/share?url=${u}` },
+  { name: 'Dribbble', color: '#EA4C89', category: 'media', url: (u,t,d,i) => `https://dribbble.com/share?url=${u}` },
+  { name: 'VSCO', color: '#000000', category: 'media', url: (u,t,d,i) => `https://vsco.co/share?url=${u}` },
+  { name: 'EyeEm', color: '#000000', category: 'media', url: (u,t,d,i) => `https://www.eyeem.com/share?url=${u}` },
+  { name: 'Pixiv', color: '#0096FA', category: 'media', url: (u,t,d,i) => `https://www.pixiv.net/share?url=${u}` },
+  { name: 'SmugMug', color: '#6DB944', category: 'media', url: (u,t,d,i) => `https://www.smugmug.com/share?url=${u}` },
+  { name: 'Fotolog', color: '#BD081C', category: 'media', url: (u,t,d,i) => `https://www.fotolog.com/share?url=${u}` },
+
+  // Professional Networks (10)
+  { name: 'AngelList', color: '#000000', category: 'professional', url: (u,t,d,i) => `https://angel.co/share?url=${u}` },
+  { name: 'Crunchbase', color: '#0288D1', category: 'professional', url: (u,t,d,i) => `https://www.crunchbase.com/share?url=${u}` },
+  { name: 'Meetup', color: '#ED1C40', category: 'professional', url: (u,t,d,i) => `https://www.meetup.com/share/?url=${u}` },
+  { name: 'Shapr', color: '#0077FF', category: 'professional', url: (u,t,d,i) => `https://www.shapr.com/share?url=${u}` },
+  { name: 'Bark', color: '#00AEF0', category: 'professional', url: (u,t,d,i) => `https://www.bark.com/share?url=${u}` },
+  { name: 'Opportunity', color: '#FF6B00', category: 'professional', url: (u,t,d,i) => `https://opportunity.com/share?url=${u}` },
+  { name: 'Ryze', color: '#71B045', category: 'professional', url: (u,t,d,i) => `https://ryze.com/share?url=${u}` },
+  { name: 'Viadeo', color: '#F88D2D', category: 'professional', url: (u,t,d,i) => `https://www.viadeo.com/share?url=${u}` },
+  { name: 'Plaxo', color: '#414F5A', category: 'professional', url: (u,t,d,i) => `https://www.plaxo.com/share?url=${u}` },
+  { name: 'Spoke', color: '#FF6A13', category: 'professional', url: (u,t,d,i) => `https://www.spoke.com/share?url=${u}` },
+
+  // Blogging Platforms (15)
+  { name: 'Medium', color: '#000000', category: 'blogging', url: (u,t,d,i) => `https://medium.com/m/global-identity?redirectUrl=${u}` },
+  { name: 'WordPress', color: '#21759B', category: 'blogging', url: (u,t,d,i) => `https://wordpress.com/press-this.php?u=${u}&t=${t}` },
+  { name: 'Blogger', color: '#FF5722', category: 'blogging', url: (u,t,d,i) => `https://www.blogger.com/blog-this.g?u=${u}&n=${t}` },
+  { name: 'Tumblr', color: '#36465D', category: 'blogging', url: (u,t,d,i) => `https://www.tumblr.com/widgets/share/tool?canonicalUrl=${u}&title=${t}` },
+  { name: 'LiveJournal', color: '#00B0EA', category: 'blogging', url: (u,t,d,i) => `https://www.livejournal.com/update.bml?subject=${t}&event=${u}` },
+  { name: 'TypePad', color: '#D2DE61', category: 'blogging', url: (u,t,d,i) => `https://www.typepad.com/share?url=${u}&title=${t}` },
+  { name: 'Ghost', color: '#15171A', category: 'blogging', url: (u,t,d,i) => `https://ghost.org/share?url=${u}` },
+  { name: 'Substack', color: '#FF6719', category: 'blogging', url: (u,t,d,i) => `https://substack.com/share?url=${u}` },
+  { name: 'Posthaven', color: '#000000', category: 'blogging', url: (u,t,d,i) => `https://posthaven.com/share?url=${u}` },
+  { name: 'Squarespace', color: '#000000', category: 'blogging', url: (u,t,d,i) => `https://www.squarespace.com/share?url=${u}` },
+  { name: 'Wix', color: '#0C6EFC', category: 'blogging', url: (u,t,d,i) => `https://www.wix.com/share?url=${u}` },
+  { name: 'Weebly', color: '#41A700', category: 'blogging', url: (u,t,d,i) => `https://www.weebly.com/share?url=${u}` },
+  { name: 'Joomla', color: '#5091CD', category: 'blogging', url: (u,t,d,i) => `https://www.joomla.org/share?url=${u}` },
+  { name: 'Drupal', color: '#0678BE', category: 'blogging', url: (u,t,d,i) => `https://www.drupal.org/share?url=${u}` },
+  { name: 'HubPages', color: '#FF7100', category: 'blogging', url: (u,t,d,i) => `https://hubpages.com/share?url=${u}` },
+
+  // Bookmarking & Content Aggregators (15)
+  { name: 'Pocket', color: '#EF4056', category: 'bookmarking', url: (u,t,d,i) => `https://getpocket.com/save?url=${u}&title=${t}` },
+  { name: 'Flipboard', color: '#E12828', category: 'bookmarking', url: (u,t,d,i) => `https://share.flipboard.com/bookmarklet/popout?v=2&title=${t}&url=${u}` },
+  { name: 'Mix', color: '#FF8226', category: 'bookmarking', url: (u,t,d,i) => `https://mix.com/add?url=${u}` },
+  { name: 'Scoop.it', color: '#FF7328', category: 'bookmarking', url: (u,t,d,i) => `https://www.scoop.it/share?url=${u}` },
+  { name: 'Diigo', color: '#4A8BC9', category: 'bookmarking', url: (u,t,d,i) => `https://www.diigo.com/post?url=${u}&title=${t}` },
+  { name: 'Instapaper', color: '#1F1F1F', category: 'bookmarking', url: (u,t,d,i) => `https://www.instapaper.com/hello2?url=${u}&title=${t}` },
+  { name: 'Evernote', color: '#00A82D', category: 'bookmarking', url: (u,t,d,i) => `https://www.evernote.com/clip.action?url=${u}&title=${t}` },
+  { name: 'OneNote', color: '#80397B', category: 'bookmarking', url: (u,t,d,i) => `https://www.onenote.com/share?url=${u}&title=${t}` },
+  { name: 'Raindrop.io', color: '#3A86FF', category: 'bookmarking', url: (u,t,d,i) => `https://raindrop.io/share?url=${u}` },
+  { name: 'StumbleUpon', color: '#EB4924', category: 'bookmarking', url: (u,t,d,i) => `https://www.stumbleupon.com/share?url=${u}` },
+  { name: 'Digg', color: '#000000', category: 'bookmarking', url: (u,t,d,i) => `http://digg.com/submit?url=${u}&title=${t}` },
+  { name: 'Delicious', color: '#3399FF', category: 'bookmarking', url: (u,t,d,i) => `https://delicious.com/save?v=5&noui&jump=close&url=${u}&title=${t}` },
+  { name: 'Slashdot', color: '#026664', category: 'bookmarking', url: (u,t,d,i) => `https://slashdot.org/submit?url=${u}&title=${t}` },
+  { name: 'Fark', color: '#FF6600', category: 'bookmarking', url: (u,t,d,i) => `https://www.fark.com/share?url=${u}&title=${t}` },
+  { name: 'Newsvine', color: '#075B2F', category: 'bookmarking', url: (u,t,d,i) => `https://www.newsvine.com/share?url=${u}&title=${t}` },
+
+  // Discussion Forums (10)
+  { name: 'Quora', color: '#B92B27', category: 'discussion', url: (u,t,d,i) => `https://www.quora.com/share?url=${u}&text=${t}` },
+  { name: 'Reddit', color: '#FF5700', category: 'discussion', url: (u,t,d,i) => `https://www.reddit.com/submit?url=${u}&title=${t}` },
+  { name: 'Stack Overflow', color: '#F48024', category: 'discussion', url: (u,t,d,i) => `https://stackoverflow.com/share?url=${u}` },
+  { name: 'Hacker News', color: '#FF6600', category: 'discussion', url: (u,t,d,i) => `https://news.ycombinator.com/submitlink?u=${u}&t=${t}` },
+  { name: 'Product Hunt', color: '#DA552F', category: 'discussion', url: (u,t,d,i) => `https://www.producthunt.com/share?url=${u}` },
+  { name: 'Indie Hackers', color: '#1E2B3A', category: 'discussion', url: (u,t,d,i) => `https://www.indiehackers.com/share?url=${u}` },
+  { name: 'Dev.to', color: '#0A0A0A', category: 'discussion', url: (u,t,d,i) => `https://dev.to/share?url=${u}` },
+  { name: 'Flarum', color: '#E74C3C', category: 'discussion', url: (u,t,d,i) => `https://flarum.org/share?url=${u}` },
+  { name: 'Discourse', color: '#121A24', category: 'discussion', url: (u,t,d,i) => `https://www.discourse.org/share?url=${u}` },
+  { name: 'Vanilla Forums', color: '#2C9FD9', category: 'discussion', url: (u,t,d,i) => `https://vanillaforums.org/share?url=${u}` },
+
+  // Music & Audio (10)
+  { name: 'Spotify', color: '#1DB954', category: 'media', url: (u,t,d,i) => `https://open.spotify.com/share?url=${u}` },
+  { name: 'Apple Music', color: '#FA243C', category: 'media', url: (u,t,d,i) => `https://music.apple.com/share?url=${u}` },
+  { name: 'SoundCloud', color: '#FF3300', category: 'media', url: (u,t,d,i) => `https://soundcloud.com/share?url=${u}` },
+  { name: 'Bandcamp', color: '#629AA9', category: 'media', url: (u,t,d,i) => `https://bandcamp.com/share?url=${u}` },
+  { name: 'Deezer', color: '#FEAA2D', category: 'media', url: (u,t,d,i) => `https://www.deezer.com/share?url=${u}` },
+  { name: 'Tidal', color: '#000000', category: 'media', url: (u,t,d,i) => `https://tidal.com/share?url=${u}` },
+  { name: 'Pandora', color: '#224099', category: 'media', url: (u,t,d,i) => `https://www.pandora.com/share?url=${u}` },
+  { name: 'iHeartRadio', color: '#C6002B', category: 'media', url: (u,t,d,i) => `https://www.iheart.com/share?url=${u}` },
+  { name: 'Last.fm', color: '#D51007', category: 'media', url: (u,t,d,i) => `https://www.last.fm/share?url=${u}` },
+  { name: 'Mixcloud', color: '#5000FF', category: 'media', url: (u,t,d,i) => `https://www.mixcloud.com/share?url=${u}` },
+
+  // Other Specialized (15)
+  { name: 'Goodreads', color: '#553B08', category: 'specialized', url: (u,t,d,i) => `https://www.goodreads.com/share?url=${u}` },
+  { name: 'Letterboxd', color: '#202830', category: 'specialized', url: (u,t,d,i) => `https://letterboxd.com/share?url=${u}` },
+  { name: 'IMDb', color: '#F5C518', category: 'specialized', url: (u,t,d,i) => `https://www.imdb.com/share?url=${u}` },
+  { name: 'Rotten Tomatoes', color: '#FA320A', category: 'specialized', url: (u,t,d,i) => `https://www.rottentomatoes.com/share?url=${u}` },
+  { name: 'TripAdvisor', color: '#34E0A1', category: 'specialized', url: (u,t,d,i) => `https://www.tripadvisor.com/Share?url=${u}` },
+  { name: 'Yelp', color: '#D32323', category: 'specialized', url: (u,t,d,i) => `https://www.yelp.com/share?url=${u}` },
+  { name: 'Zomato', color: '#CB202D', category: 'specialized', url: (u,t,d,i) => `https://www.zomato.com/share?url=${u}` },
+  { name: 'Airbnb', color: '#FF5A5F', category: 'specialized', url: (u,t,d,i) => `https://www.airbnb.com/share?url=${u}` },
+  { name: 'Booking.com', color: '#003580', category: 'specialized', url: (u,t,d,i) => `https://www.booking.com/share?url=${u}` },
+  { name: 'Expedia', color: '#2A70C8', category: 'specialized', url: (u,t,d,i) => `https://www.expedia.com/share?url=${u}` },
+  { name: 'Foursquare', color: '#F94877', category: 'specialized', url: (u,t,d,i) => `https://foursquare.com/share?url=${u}` },
+  { name: 'Swarm', color: '#FFA633', category: 'specialized', url: (u,t,d,i) => `https://www.swarmapp.com/share?url=${u}` },
+  { name: 'Untappd', color: '#FFC000', category: 'specialized', url: (u,t,d,i) => `https://untappd.com/share?url=${u}` },
+  { name: 'AllTrails', color: '#3DDC84', category: 'specialized', url: (u,t,d,i) => `https://www.alltrails.com/share?url=${u}` },
+  { name: 'Strava', color: '#FC4C02', category: 'specialized', url: (u,t,d,i) => `https://www.strava.com/share?url=${u}` },
+  // Other
+  { name: 'Email', color: '#EA4335', category: 'other', 
+    url: (u,t,d) => `mailto:?subject=${t}&body=${d}%0A%0A${u}` },
+  { name: 'Copy Link', color: '#666666', category: 'other', 
+    url: (u) => `javascript:navigator.clipboard.writeText('${decodeURIComponent(u)}');alert('Link copied!')` }
+];
+
+// Generate platform buttons with filtering
+    function generateShareButtons(category = 'all', searchTerm = '') {
+      const container = document.getElementById('platforms-container');
+      container.innerHTML = '';
+      
+      // Filter platforms
+      const filteredPlatforms = socialPlatforms.filter(platform => {
+        const matchesCategory = category === 'all' || platform.category === category;
+        const matchesSearch = !searchTerm || 
+          platform.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+      
+      // Show no results message if empty
+      if (filteredPlatforms.length === 0) {
+        container.innerHTML = '<div class="no-results">No platforms found matching your criteria</div>';
+        return;
+      }
+      
+      // Create buttons for filtered platforms
+      filteredPlatforms.forEach(platform => {
+        const shareUrl = platform.url(currentUrl, pageTitle, pageDesc, pageImage);
+        const btn = document.createElement('a');
+        
+        btn.href = shareUrl;
+        btn.target = '_blank';
+        btn.className = 'platform-btn';
+        btn.style.borderLeft = `4px solid ${platform.color}`;
+        btn.textContent = platform.name;
+        
+        container.appendChild(btn);
+      });
+    }
+
+    // Search functionality
+    document.getElementById('search-box').addEventListener('input', function(e) {
+      const activeTab = document.querySelector('.category-tab.active');
+      const category = activeTab ? activeTab.dataset.category : 'all';
+      generateShareButtons(category, e.target.value);
+    });
+
+    // Category tabs functionality
+    document.querySelectorAll('.category-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Update active tab
+        document.querySelectorAll('.category-tab').forEach(t => {
+          t.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // Regenerate buttons with current search term
+        const searchTerm = document.getElementById('search-box').value;
+        generateShareButtons(this.dataset.category, searchTerm);
+      });
+    });
+
+    // Initialize with all platforms
+    generateShareButtons();
+  </script>
+</body>
+</html>
