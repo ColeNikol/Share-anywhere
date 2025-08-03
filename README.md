@@ -3,7 +3,7 @@ Share button to share your web page anywhere
 
 How to Use the Share-anywhere
 
-Easy Integration for Any Website
+Easy Integration for Any Website.
 This universal share solution makes it simple to add comprehensive sharing capabilities to any webpage with just a few lines of code.
 
 What You Get
